@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: fct_detection_efficacy
+    description: >-
+      Per rule comparison of alerts against simulator ground truth. An alert is a true positive
+      when at least one of the events it was raised on is a labelled attack line. Recall counts
+      the attacks of the scenarios a rule is designed for that at least one alert of the rule
+      matched.
+    columns:
+      - name: rule_id
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('rule_catalog')
+                field: rule_id
+      - name: precision
+        tests: [between_zero_and_one]
+      - name: recall
+        tests: [between_zero_and_one]
+      - name: false_negatives
+        tests: [not_null]
+      - name: avg_detection_latency_seconds
+        description: >-
+          Seconds between attack start and the event that completed the rule condition, floored
+          at zero because nginx timestamps have second resolution.
+
+  - name: fct_mitre_coverage
+    description: ATT&CK techniques relevant to the collected logs and the rules covering them.
+    columns:
+      - name: technique_id
+        tests: [not_null, unique]
+      - name: tactic
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - reconnaissance
+                  - initial-access
+                  - credential-access
+                  - discovery
+                  - lateral-movement
+                  - command-and-control
+                  - impact
+
+  - name: fct_daily_security_summary
+    description: Daily event volumes, alert counts by level and distinct attacker addresses.
+    columns:
+      - name: summary_date
+        tests: [not_null, unique]
+
+  - name: dim_attacker_ip
+    description: One row per address that raised an alert, with location and rule history.
+    columns:
+      - name: ip
+        tests: [not_null, unique]
+
+  - name: fct_user_risk
+    description: Per user login baseline, failures and alert history.
+    columns:
+      - name: user_name
+        tests: [not_null, unique]
+      - name: risk_indicator
+        tests: [not_null]

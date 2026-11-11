@@ -1,0 +1,82 @@
+version: 2
+
+sources:
+  - name: sentinelflow
+    schema: "{{ env_var('CLICKHOUSE_DB', 'sentinelflow') }}"
+    description: Tables written by the streaming jobs and by the ClickHouse Kafka consumer.
+    tables:
+      - name: events
+        description: Normalized security events, one row per parsed log line.
+        columns:
+          - name: event_id
+            description: SHA-256 of the raw message
+            data_type: String
+            tests: [not_null]
+          - name: timestamp
+            description: Event time parsed from the log line
+            data_type: DateTime64(6, 'UTC')
+            tests: [not_null]
+          - name: ingest_time
+            description: Time the broker received the line
+            data_type: DateTime64(6, 'UTC')
+          - name: source_type
+            description: nginx, ssh, firewall or app
+            data_type: LowCardinality(String)
+            tests:
+              - accepted_values:
+                  arguments:
+                    values: [nginx, ssh, firewall, app]
+          - name: event_category
+            description: authentication, network or web
+            data_type: LowCardinality(String)
+            tests:
+              - accepted_values:
+                  arguments:
+                    values: [authentication, network, web]
+          - name: event_action
+            description: Normalized action name
+            data_type: LowCardinality(String)
+          - name: event_outcome
+            description: success or failure
+            data_type: LowCardinality(Nullable(String))
+          - name: source_ip
+            description: Client or packet source address
+            data_type: Nullable(IPv4)
+          - name: source_port
+            description: Client or packet source port
+            data_type: Nullable(UInt16)
+          - name: destination_ip
+            description: Packet destination address
+            data_type: Nullable(IPv4)
+          - name: destination_port
+            description: Packet destination port
+            data_type: Nullable(UInt16)
+          - name: host_name
+            description: Host or service that emitted the line
+            data_type: LowCardinality(Nullable(String))
+          - name: user_name
+            description: Account name presented by the client
+            data_type: Nullable(String)
+          - name: user_agent
+            description: HTTP user agent
+            data_type: Nullable(String)
+          - name: http_method
+            description: HTTP request method
+            data_type: LowCardinality(Nullable(String))
+          - name: url_path
+            description: Request path including the query string
+            data_type: Nullable(String)
+          - name: http_status
+            description: HTTP response status
+            data_type: Nullable(UInt16)
+          - name: raw_message
+            description: Original log line
+            data_type: String
+      - name: alerts
+        description: Alert versions written by the detection job, newest version wins.
+      - name: ground_truth
+        description: Attack labels emitted by the simulator, one row per attack log line.
+      - name: parse_failures
+        description: Lines that could not be parsed.
+      - name: pipeline_batches
+        description: Streaming query progress reports.

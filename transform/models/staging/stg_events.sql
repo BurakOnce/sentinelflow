@@ -1,0 +1,20 @@
+select
+    event_id,
+    timestamp as event_time,
+    toDate(timestamp) as event_date,
+    ingest_time,
+    source_type,
+    event_category,
+    event_action,
+    event_outcome,
+    toString(source_ip) as source_ip,
+    source_port,
+    toString(destination_ip) as destination_ip,
+    destination_port,
+    host_name,
+    user_name,
+    user_agent,
+    http_method,
+    url_path,
+    http_status
+from {{ source('sentinelflow', 'events') }} final

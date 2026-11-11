@@ -1,0 +1,193 @@
+network,country_code,country,city,latitude,longitude
+78.160.0.0/14,TR,Turkey,Istanbul,41.0082,28.9784
+78.164.0.0/14,TR,Turkey,Ankara,39.9334,32.8597
+78.168.0.0/14,TR,Turkey,Izmir,38.4237,27.1428
+78.172.0.0/14,TR,Turkey,Bursa,40.1885,29.0610
+78.176.0.0/14,TR,Turkey,Antalya,36.8969,30.7133
+78.180.0.0/14,TR,Turkey,Kocaeli,40.8533,29.8815
+78.184.0.0/14,TR,Turkey,Istanbul,41.0082,28.9784
+78.188.0.0/14,TR,Turkey,Ankara,39.9334,32.8597
+88.224.0.0/14,TR,Turkey,Istanbul,41.0082,28.9784
+88.228.0.0/14,TR,Turkey,Ankara,39.9334,32.8597
+88.232.0.0/14,TR,Turkey,Izmir,38.4237,27.1428
+88.236.0.0/14,TR,Turkey,Bursa,40.1885,29.0610
+88.240.0.0/14,TR,Turkey,Antalya,36.8969,30.7133
+88.244.0.0/14,TR,Turkey,Kocaeli,40.8533,29.8815
+88.248.0.0/14,TR,Turkey,Istanbul,41.0082,28.9784
+88.252.0.0/14,TR,Turkey,Ankara,39.9334,32.8597
+85.96.0.0/15,TR,Turkey,Istanbul,41.0082,28.9784
+85.98.0.0/15,TR,Turkey,Ankara,39.9334,32.8597
+85.100.0.0/15,TR,Turkey,Izmir,38.4237,27.1428
+85.102.0.0/15,TR,Turkey,Bursa,40.1885,29.0610
+85.104.0.0/15,TR,Turkey,Antalya,36.8969,30.7133
+85.106.0.0/15,TR,Turkey,Kocaeli,40.8533,29.8815
+85.108.0.0/15,TR,Turkey,Istanbul,41.0082,28.9784
+85.110.0.0/15,TR,Turkey,Ankara,39.9334,32.8597
+95.0.0.0/15,TR,Turkey,Istanbul,41.0082,28.9784
+95.2.0.0/15,TR,Turkey,Ankara,39.9334,32.8597
+95.4.0.0/15,TR,Turkey,Izmir,38.4237,27.1428
+95.6.0.0/15,TR,Turkey,Bursa,40.1885,29.0610
+95.8.0.0/15,TR,Turkey,Antalya,36.8969,30.7133
+95.10.0.0/15,TR,Turkey,Kocaeli,40.8533,29.8815
+95.12.0.0/15,TR,Turkey,Istanbul,41.0082,28.9784
+95.14.0.0/15,TR,Turkey,Ankara,39.9334,32.8597
+79.192.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+79.200.0.0/13,DE,Germany,Munich,48.1351,11.5820
+79.208.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+79.216.0.0/13,DE,Germany,Munich,48.1351,11.5820
+79.224.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+79.232.0.0/13,DE,Germany,Munich,48.1351,11.5820
+79.240.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+79.248.0.0/13,DE,Germany,Munich,48.1351,11.5820
+84.128.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+84.136.0.0/13,DE,Germany,Munich,48.1351,11.5820
+84.144.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+84.152.0.0/13,DE,Germany,Munich,48.1351,11.5820
+84.160.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+84.168.0.0/13,DE,Germany,Munich,48.1351,11.5820
+84.176.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+84.184.0.0/13,DE,Germany,Munich,48.1351,11.5820
+91.0.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+91.8.0.0/13,DE,Germany,Munich,48.1351,11.5820
+91.16.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+91.24.0.0/13,DE,Germany,Munich,48.1351,11.5820
+91.32.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+91.40.0.0/13,DE,Germany,Munich,48.1351,11.5820
+91.48.0.0/13,DE,Germany,Berlin,52.5200,13.4050
+91.56.0.0/13,DE,Germany,Munich,48.1351,11.5820
+86.128.0.0/13,GB,United Kingdom,London,51.5074,-0.1278
+86.136.0.0/13,GB,United Kingdom,London,51.5074,-0.1278
+86.144.0.0/13,GB,United Kingdom,London,51.5074,-0.1278
+86.152.0.0/13,GB,United Kingdom,London,51.5074,-0.1278
+86.160.0.0/13,GB,United Kingdom,London,51.5074,-0.1278
+86.168.0.0/13,GB,United Kingdom,London,51.5074,-0.1278
+86.176.0.0/13,GB,United Kingdom,London,51.5074,-0.1278
+86.184.0.0/13,GB,United Kingdom,London,51.5074,-0.1278
+2.24.0.0/16,GB,United Kingdom,London,51.5074,-0.1278
+2.25.0.0/16,GB,United Kingdom,London,51.5074,-0.1278
+2.26.0.0/16,GB,United Kingdom,London,51.5074,-0.1278
+2.27.0.0/16,GB,United Kingdom,London,51.5074,-0.1278
+2.28.0.0/16,GB,United Kingdom,London,51.5074,-0.1278
+2.29.0.0/16,GB,United Kingdom,London,51.5074,-0.1278
+2.30.0.0/16,GB,United Kingdom,London,51.5074,-0.1278
+2.31.0.0/16,GB,United Kingdom,London,51.5074,-0.1278
+73.0.0.0/11,US,United States,New York,40.7128,-74.0060
+73.32.0.0/11,US,United States,San Francisco,37.7749,-122.4194
+73.64.0.0/11,US,United States,New York,40.7128,-74.0060
+73.96.0.0/11,US,United States,San Francisco,37.7749,-122.4194
+73.128.0.0/11,US,United States,New York,40.7128,-74.0060
+73.160.0.0/11,US,United States,San Francisco,37.7749,-122.4194
+73.192.0.0/11,US,United States,New York,40.7128,-74.0060
+73.224.0.0/11,US,United States,San Francisco,37.7749,-122.4194
+67.160.0.0/14,US,United States,New York,40.7128,-74.0060
+67.164.0.0/14,US,United States,San Francisco,37.7749,-122.4194
+67.168.0.0/14,US,United States,New York,40.7128,-74.0060
+67.172.0.0/14,US,United States,San Francisco,37.7749,-122.4194
+67.176.0.0/14,US,United States,New York,40.7128,-74.0060
+67.180.0.0/14,US,United States,San Francisco,37.7749,-122.4194
+67.184.0.0/14,US,United States,New York,40.7128,-74.0060
+67.188.0.0/14,US,United States,San Francisco,37.7749,-122.4194
+36.96.0.0/14,CN,China,Beijing,39.9042,116.4074
+36.100.0.0/14,CN,China,Shanghai,31.2304,121.4737
+36.104.0.0/14,CN,China,Beijing,39.9042,116.4074
+36.108.0.0/14,CN,China,Shanghai,31.2304,121.4737
+36.112.0.0/14,CN,China,Beijing,39.9042,116.4074
+36.116.0.0/14,CN,China,Shanghai,31.2304,121.4737
+36.120.0.0/14,CN,China,Beijing,39.9042,116.4074
+36.124.0.0/14,CN,China,Shanghai,31.2304,121.4737
+117.136.0.0/16,CN,China,Beijing,39.9042,116.4074
+117.137.0.0/16,CN,China,Shanghai,31.2304,121.4737
+117.138.0.0/16,CN,China,Beijing,39.9042,116.4074
+117.139.0.0/16,CN,China,Shanghai,31.2304,121.4737
+117.140.0.0/16,CN,China,Beijing,39.9042,116.4074
+117.141.0.0/16,CN,China,Shanghai,31.2304,121.4737
+117.142.0.0/16,CN,China,Beijing,39.9042,116.4074
+117.143.0.0/16,CN,China,Shanghai,31.2304,121.4737
+95.24.0.0/16,RU,Russia,Moscow,55.7558,37.6173
+95.25.0.0/16,RU,Russia,Novosibirsk,55.0084,82.9357
+95.26.0.0/16,RU,Russia,Moscow,55.7558,37.6173
+95.27.0.0/16,RU,Russia,Novosibirsk,55.0084,82.9357
+95.28.0.0/16,RU,Russia,Moscow,55.7558,37.6173
+95.29.0.0/16,RU,Russia,Novosibirsk,55.0084,82.9357
+95.30.0.0/16,RU,Russia,Moscow,55.7558,37.6173
+95.31.0.0/16,RU,Russia,Novosibirsk,55.0084,82.9357
+5.136.0.0/16,RU,Russia,Moscow,55.7558,37.6173
+5.137.0.0/16,RU,Russia,Novosibirsk,55.0084,82.9357
+5.138.0.0/16,RU,Russia,Moscow,55.7558,37.6173
+5.139.0.0/16,RU,Russia,Novosibirsk,55.0084,82.9357
+5.140.0.0/16,RU,Russia,Moscow,55.7558,37.6173
+5.141.0.0/16,RU,Russia,Novosibirsk,55.0084,82.9357
+5.142.0.0/16,RU,Russia,Moscow,55.7558,37.6173
+5.143.0.0/16,RU,Russia,Novosibirsk,55.0084,82.9357
+177.32.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+177.36.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+177.40.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+177.44.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+177.48.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+177.52.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+177.56.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+177.60.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+187.0.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+187.4.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+187.8.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+187.12.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+187.16.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+187.20.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+187.24.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+187.28.0.0/14,BR,Brazil,Sao Paulo,-23.5505,-46.6333
+113.160.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+113.164.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+113.168.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+113.172.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+113.176.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+113.180.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+113.184.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+113.188.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+14.160.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+14.164.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+14.168.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+14.172.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+14.176.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+14.180.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+14.184.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+14.188.0.0/14,VN,Vietnam,Hanoi,21.0278,105.8342
+117.192.0.0/13,IN,India,Mumbai,19.0760,72.8777
+117.200.0.0/13,IN,India,Mumbai,19.0760,72.8777
+117.208.0.0/13,IN,India,Mumbai,19.0760,72.8777
+117.216.0.0/13,IN,India,Mumbai,19.0760,72.8777
+117.224.0.0/13,IN,India,Mumbai,19.0760,72.8777
+117.232.0.0/13,IN,India,Mumbai,19.0760,72.8777
+117.240.0.0/13,IN,India,Mumbai,19.0760,72.8777
+117.248.0.0/13,IN,India,Mumbai,19.0760,72.8777
+59.88.0.0/16,IN,India,Mumbai,19.0760,72.8777
+59.89.0.0/16,IN,India,Mumbai,19.0760,72.8777
+59.90.0.0/16,IN,India,Mumbai,19.0760,72.8777
+59.91.0.0/16,IN,India,Mumbai,19.0760,72.8777
+59.92.0.0/16,IN,India,Mumbai,19.0760,72.8777
+59.93.0.0/16,IN,India,Mumbai,19.0760,72.8777
+59.94.0.0/16,IN,India,Mumbai,19.0760,72.8777
+59.95.0.0/16,IN,India,Mumbai,19.0760,72.8777
+126.0.0.0/11,JP,Japan,Tokyo,35.6762,139.6503
+126.32.0.0/11,JP,Japan,Tokyo,35.6762,139.6503
+126.64.0.0/11,JP,Japan,Tokyo,35.6762,139.6503
+126.96.0.0/11,JP,Japan,Tokyo,35.6762,139.6503
+126.128.0.0/11,JP,Japan,Tokyo,35.6762,139.6503
+126.160.0.0/11,JP,Japan,Tokyo,35.6762,139.6503
+126.192.0.0/11,JP,Japan,Tokyo,35.6762,139.6503
+126.224.0.0/11,JP,Japan,Tokyo,35.6762,139.6503
+1.120.0.0/16,AU,Australia,Sydney,-33.8688,151.2093
+1.121.0.0/16,AU,Australia,Sydney,-33.8688,151.2093
+1.122.0.0/16,AU,Australia,Sydney,-33.8688,151.2093
+1.123.0.0/16,AU,Australia,Sydney,-33.8688,151.2093
+1.124.0.0/16,AU,Australia,Sydney,-33.8688,151.2093
+1.125.0.0/16,AU,Australia,Sydney,-33.8688,151.2093
+1.126.0.0/16,AU,Australia,Sydney,-33.8688,151.2093
+1.127.0.0/16,AU,Australia,Sydney,-33.8688,151.2093
+101.160.0.0/14,AU,Australia,Sydney,-33.8688,151.2093
+101.164.0.0/14,AU,Australia,Sydney,-33.8688,151.2093
+101.168.0.0/14,AU,Australia,Sydney,-33.8688,151.2093
+101.172.0.0/14,AU,Australia,Sydney,-33.8688,151.2093
+101.176.0.0/14,AU,Australia,Sydney,-33.8688,151.2093
+101.180.0.0/14,AU,Australia,Sydney,-33.8688,151.2093
+101.184.0.0/14,AU,Australia,Sydney,-33.8688,151.2093
+101.188.0.0/14,AU,Australia,Sydney,-33.8688,151.2093

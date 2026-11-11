@@ -1,0 +1,8 @@
+network,abuse_score,categories
+36.96.0.0/13,92,ssh-bruteforce|scanner
+117.136.0.0/14,78,scanner
+95.24.0.0/14,88,ssh-bruteforce|brute-force
+5.136.0.0/15,71,web-attack
+177.32.0.0/13,84,brute-force|web-attack
+113.160.0.0/13,90,ssh-bruteforce|scanner
+117.192.0.0/12,76,brute-force

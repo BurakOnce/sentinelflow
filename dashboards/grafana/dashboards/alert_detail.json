@@ -1,0 +1,224 @@
+{
+  "uid": "sentinelflow-alert-detail",
+  "title": "Alert Detail",
+  "tags": [
+    "sentinelflow",
+    "soc"
+  ],
+  "timezone": "utc",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "rule",
+        "label": "Rule",
+        "type": "query",
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "clickhouse"
+        },
+        "query": "SELECT DISTINCT rule_name FROM sentinelflow.alerts ORDER BY rule_name",
+        "definition": "SELECT DISTINCT rule_name FROM sentinelflow.alerts ORDER BY rule_name",
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": "*",
+        "multi": false,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
+      },
+      {
+        "name": "level",
+        "label": "Level",
+        "type": "custom",
+        "includeAll": true,
+        "allValue": "*",
+        "query": "critical,high,medium,low",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": []
+      },
+      {
+        "name": "ip",
+        "label": "IP",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      },
+      {
+        "name": "user",
+        "label": "User",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      },
+      {
+        "name": "alert_id",
+        "label": "Alert id",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "Alerts",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 11
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT alert_id, first_seen, level, risk_score AS risk, rule_title AS rule, entity_type, entity, user_name, country, event_count AS events, arrayStringConcat(mitre_techniques, ', ') AS techniques, status FROM sentinelflow.alerts FINAL WHERE $__timeFilter(first_seen) AND ('${rule}' = '*' OR rule_name = '${rule}') AND ('${level}' = '*' OR level = '${level}') AND ('${ip}' = '' OR entity = '${ip}' OR source_ip = '${ip}') AND ('${user}' = '' OR entity = '${user}' OR user_name = '${user}') ORDER BY first_seen DESC LIMIT 500",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "alert_id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Show related events",
+                    "url": "/d/sentinelflow-alert-detail/alert-detail?${__url_time_range}&var-alert_id=${__value.raw}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "risk"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Selected alert",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 24,
+        "h": 5
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT rule_title AS rule, level, risk_score AS risk, entity_type, entity, source_ip, user_name, first_seen, last_seen, detected_at, event_count AS events, arrayStringConcat(mitre_tactics, ', ') AS tactics, arrayStringConcat(mitre_techniques, ', ') AS techniques, country, city, as_org AS network, is_known_malicious AS known_bad, abuse_score, toString(risk_factors) AS risk_factors FROM sentinelflow.alerts FINAL WHERE alert_id = '${alert_id}'",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "Related events",
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "clickhouse"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 24,
+        "h": 12
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "clickhouse"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "queryType": "table",
+          "rawSql": "SELECT timestamp, source_type, event_action, event_outcome, source_ip, destination_port, user_name, http_status, url_path, raw_message FROM sentinelflow.events WHERE event_id IN (SELECT arrayJoin(event_ids) FROM sentinelflow.alerts FINAL WHERE alert_id = '${alert_id}') ORDER BY timestamp LIMIT 1000",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

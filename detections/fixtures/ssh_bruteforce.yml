@@ -1,0 +1,32 @@
+rule: ssh_bruteforce
+cases:
+  - name: fifteen failed passwords from one address in under three minutes
+    expect: alert
+    count: 1
+    lines:
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[2{n:04d}]: Failed password for root from 36.100.2.3 port 4{n:04d} ssh2'
+        repeat: 15
+        every: 10
+  - name: fourteen failed passwords stay below the threshold
+    expect: no_alert
+    lines:
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[2{n:04d}]: Failed password for root from 36.100.2.3 port 4{n:04d} ssh2'
+        repeat: 14
+        every: 10
+  - name: slow guessing spread over twenty minutes
+    expect: no_alert
+    lines:
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[2{n:04d}]: Failed password for root from 36.100.2.3 port 4{n:04d} ssh2'
+        repeat: 20
+        every: 60
+  - name: a user mistypes the password once and then logs in
+    expect: no_alert
+    lines:
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[3100]: Failed password for ayse.yilmaz from 78.160.10.10 port 51000 ssh2'
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[3100]: Accepted password for ayse.yilmaz from 78.160.10.10 port 51000 ssh2'
+        at: 6

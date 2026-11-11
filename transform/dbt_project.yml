@@ -1,0 +1,44 @@
+name: sentinelflow
+version: "1.0.0"
+config-version: 2
+profile: sentinelflow
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: target
+clean-targets: [target, dbt_packages]
+
+models:
+  sentinelflow:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
+      +engine: MergeTree()
+
+seeds:
+  sentinelflow:
+    rule_catalog:
+      +column_types:
+        rule_id: String
+        rule_name: String
+        rule_title: String
+        rule_type: String
+        level: String
+        status: String
+        techniques: String
+        tactics: String
+        source_file: String
+    rule_scenario_map:
+      +column_types:
+        rule_name: String
+        scenario: String
+    mitre_techniques:
+      +column_types:
+        technique_id: String
+        technique_name: String
+        tactic: String

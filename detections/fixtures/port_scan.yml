@@ -1,0 +1,28 @@
+rule: port_scan
+cases:
+  - name: twenty five ports probed in twenty five seconds
+    expect: alert
+    count: 1
+    lines:
+      - source: firewall
+        raw: '{ts} fw-edge-01 kernel: FW ACTION=DROP IN=eth0 OUT= SRC=5.136.1.20 DST=203.0.113.10 LEN=60 TOS=0x00 PREC=0x00 TTL=50 ID={n} DF PROTO=TCP SPT=5{n:04d} DPT=1{n:03d} WINDOW=64240 RES=0x00 SYN URGP=0'
+        repeat: 25
+  - name: nineteen ports stay below the threshold
+    expect: no_alert
+    lines:
+      - source: firewall
+        raw: '{ts} fw-edge-01 kernel: FW ACTION=DROP IN=eth0 OUT= SRC=5.136.1.20 DST=203.0.113.10 LEN=60 TOS=0x00 PREC=0x00 TTL=50 ID={n} DF PROTO=TCP SPT=5{n:04d} DPT=1{n:03d} WINDOW=64240 RES=0x00 SYN URGP=0'
+        repeat: 19
+  - name: slow probing over ten minutes
+    expect: no_alert
+    lines:
+      - source: firewall
+        raw: '{ts} fw-edge-01 kernel: FW ACTION=DROP IN=eth0 OUT= SRC=5.136.1.20 DST=203.0.113.10 LEN=60 TOS=0x00 PREC=0x00 TTL=50 ID={n} DF PROTO=TCP SPT=5{n:04d} DPT=1{n:03d} WINDOW=64240 RES=0x00 SYN URGP=0'
+        repeat: 20
+        every: 30
+  - name: internal monitoring host touching many ports
+    expect: no_alert
+    lines:
+      - source: firewall
+        raw: '{ts} fw-edge-01 kernel: FW ACTION=ACCEPT IN=eth0 OUT=eth1 SRC=10.20.0.5 DST=203.0.113.10 LEN=60 TOS=0x00 PREC=0x00 TTL=64 ID={n} DF PROTO=TCP SPT=5{n:04d} DPT=1{n:03d} WINDOW=64240 RES=0x00 SYN URGP=0'
+        repeat: 40

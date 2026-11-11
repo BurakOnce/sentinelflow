@@ -1,0 +1,24 @@
+version: 2
+
+seeds:
+  - name: rule_catalog
+    description: Alerting rules exported from detections/rules by sentinelflow-rules export.
+    columns:
+      - name: rule_id
+        tests: [not_null, unique]
+      - name: rule_name
+        tests: [not_null, unique]
+  - name: rule_scenario_map
+    description: Simulator scenarios each rule is designed to detect.
+    columns:
+      - name: rule_name
+        tests:
+          - relationships:
+              arguments:
+                to: ref('rule_catalog')
+                field: rule_name
+  - name: mitre_techniques
+    description: ATT&CK techniques observable in the collected log sources.
+    columns:
+      - name: technique_id
+        tests: [not_null, unique]

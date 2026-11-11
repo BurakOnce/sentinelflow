@@ -1,0 +1,10 @@
+rule_name,scenario
+ssh_bruteforce,ssh_bruteforce
+ssh_bruteforce,brute_force_success
+password_spraying,password_spraying
+credential_stuffing,credential_stuffing
+brute_force_success,brute_force_success
+port_scan,port_scan
+web_attack_pattern,web_attack
+scanner_user_agent,web_attack
+impossible_travel,impossible_travel

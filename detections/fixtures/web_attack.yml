@@ -1,0 +1,24 @@
+rule: web_attack_pattern
+cases:
+  - name: encoded sql injection probe
+    expect: alert
+    lines:
+      - source: nginx
+        raw: '36.100.2.3 - - [{ts}] "GET /api/v1/reports?id=1%27%20OR%20%271%27%3D%271 HTTP/1.1" 500 176 "-" "Mozilla/5.0"'
+  - name: path traversal and cross site scripting from one address
+    expect: alert
+    count: 1
+    lines:
+      - source: nginx
+        raw: '36.100.2.3 - - [{ts}] "GET /download?file=../../../../etc/passwd HTTP/1.1" 403 150 "-" "Mozilla/5.0"'
+      - source: nginx
+        raw: '36.100.2.3 - - [{ts}] "GET /search?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E HTTP/1.1" 200 900 "-" "Mozilla/5.0"'
+        at: 2
+  - name: ordinary portal navigation
+    expect: no_alert
+    lines:
+      - source: nginx
+        raw: '78.160.10.10 - - [{ts}] "GET /dashboard HTTP/1.1" 200 21000 "-" "Mozilla/5.0"'
+      - source: nginx
+        raw: '78.160.10.10 - - [{ts}] "GET /search?q=union+station HTTP/1.1" 200 900 "-" "Mozilla/5.0"'
+        at: 3

@@ -1,0 +1,49 @@
+title: Failed SSH Password Login
+id: 6f9a6614-019e-459c-bcc5-069f4fe02e2a
+name: ssh_failed_login
+status: stable
+description: A password login to sshd was rejected, including attempts for accounts that do not exist.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: SentinelFlow
+date: 2026-09-30
+tags:
+  - attack.credential-access
+  - attack.t1110.001
+logsource:
+  product: sentinelflow
+  category: authentication
+  service: ssh
+detection:
+  selection:
+    event_action: ssh_login
+    event_outcome: failure
+  condition: selection
+falsepositives:
+  - Users mistyping their password
+level: low
+---
+title: SSH Brute Force
+id: 95023802-9e6c-429a-84f8-4c1ee3e09ce4
+name: ssh_bruteforce
+status: stable
+description: Fifteen or more failed SSH password logins from one source address within five minutes.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: SentinelFlow
+date: 2026-09-30
+tags:
+  - attack.credential-access
+  - attack.t1110.001
+correlation:
+  type: event_count
+  rules:
+    - ssh_failed_login
+  group-by:
+    - source_ip
+  timespan: 5m
+  condition:
+    gte: 15
+falsepositives:
+  - Misconfigured automation retrying with a stale password
+level: medium

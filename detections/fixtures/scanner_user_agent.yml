@@ -1,0 +1,15 @@
+rule: scanner_user_agent
+cases:
+  - name: nikto sweep from one address raises one alert
+    expect: alert
+    count: 1
+    lines:
+      - source: nginx
+        raw: '59.90.100.27 - - [{ts}] "GET /admin/{n} HTTP/1.1" 404 153 "-" "Mozilla/5.00 (Nikto/2.5.0) (Evasions:None) (Test:{n:06d})"'
+        repeat: 30
+  - name: regular browser traffic
+    expect: no_alert
+    lines:
+      - source: nginx
+        raw: '78.160.10.10 - - [{ts}] "GET /reports/{n} HTTP/1.1" 200 4000 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/140.0.0.0 Safari/537.36"'
+        repeat: 10

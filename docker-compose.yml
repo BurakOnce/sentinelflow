@@ -1,0 +1,440 @@
+name: sentinelflow
+
+x-spark-env: &spark-env
+  SPARK_MASTER_URL: spark://spark-master:7077
+  SPARK_WORKER_DIR: /tmp/spark-work
+  TZ: UTC
+
+x-app-env: &app-env
+  TZ: UTC
+  KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+  CLICKHOUSE_HOST: clickhouse
+  CLICKHOUSE_PORT: "8123"
+  CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+  CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+  CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+  CLICKHOUSE_KAFKA_BROKERS: redpanda:9092
+  S3_ENDPOINT: http://minio:9000
+  S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+  S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+  LAKE_ROOT: s3a://
+  CHECKPOINT_ROOT: s3a://checkpoints
+  THREAT_INTEL_FEEDS: ${THREAT_INTEL_FEEDS}
+  ABUSEIPDB_API_KEY: ${ABUSEIPDB_API_KEY}
+
+x-spark-job: &spark-job
+  image: sentinelflow/spark:local
+  profiles: [streaming]
+  restart: on-failure
+  volumes:
+    - ./detections/rules:/opt/rules:ro
+  depends_on:
+    spark-worker:
+      condition: service_healthy
+    clickhouse-init:
+      condition: service_completed_successfully
+    redpanda-topics:
+      condition: service_completed_successfully
+    minio-init:
+      condition: service_completed_successfully
+  healthcheck:
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4040', timeout=3)"]
+    interval: 15s
+    timeout: 5s
+    retries: 10
+    start_period: 60s
+
+x-dagster-env: &dagster-env
+  <<: *app-env
+  DAGSTER_POSTGRES_HOST: dagster-postgres
+  DAGSTER_POSTGRES_USER: ${DAGSTER_POSTGRES_USER}
+  DAGSTER_POSTGRES_PASSWORD: ${DAGSTER_POSTGRES_PASSWORD}
+  DAGSTER_POSTGRES_DB: ${DAGSTER_POSTGRES_DB}
+  S3_ENDPOINT_URL: http://minio:9000
+  LABELS_DIR: /data/labels
+  DBT_PROJECT_DIR: /opt/sentinelflow/transform
+  BRONZE_RETENTION_DAYS: ${BRONZE_RETENTION_DAYS}
+
+services:
+  redpanda:
+    image: redpandadata/redpanda:${REDPANDA_VERSION}
+    profiles: [core]
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container
+      - --smp=1
+      - --memory=1G
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:${REDPANDA_KAFKA_PORT}
+      - --schema-registry-addr=internal://0.0.0.0:8081,external://0.0.0.0:18081
+      - --rpc-addr=redpanda:33145
+      - --advertise-rpc-addr=redpanda:33145
+    ports:
+      - "${REDPANDA_KAFKA_PORT}:19092"
+      - "${REDPANDA_SCHEMA_REGISTRY_PORT}:18081"
+      - "${REDPANDA_ADMIN_PORT}:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  redpanda-console:
+    image: redpandadata/console:${REDPANDA_CONSOLE_VERSION}
+    profiles: [core]
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+      SCHEMAREGISTRY_ENABLED: "true"
+      SCHEMAREGISTRY_URLS: http://redpanda:8081
+    ports:
+      - "${REDPANDA_CONSOLE_PORT}:8080"
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8080/admin/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redpanda-topics:
+    image: redpandadata/redpanda:${REDPANDA_VERSION}
+    profiles: [core]
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        topics="raw.nginx raw.ssh raw.firewall raw.app raw.dlq events.normalized alerts labels.ground_truth"
+        for topic in $$topics; do
+          if ! rpk topic describe "$$topic" -X brokers=redpanda:9092 > /dev/null 2>&1; then
+            rpk topic create "$$topic" -p ${RAW_TOPIC_PARTITIONS} -X brokers=redpanda:9092
+          fi
+        done
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    restart: "no"
+
+  vector:
+    image: timberio/vector:${VECTOR_VERSION}
+    profiles: [core]
+    command: ["--config", "/etc/vector/vector.yaml"]
+    ports:
+      - "${VECTOR_API_PORT}:8686"
+    volumes:
+      - ./ingestion/vector/vector.yaml:/etc/vector/vector.yaml:ro
+      - ./data/logs:/data/logs:ro
+      - ./data/labels:/data/labels:ro
+      - vector-data:/var/lib/vector
+    depends_on:
+      redpanda-topics:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8686"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:${CLICKHOUSE_VERSION}
+    profiles: [core]
+    environment:
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ports:
+      - "${CLICKHOUSE_HTTP_PORT}:8123"
+      - "${CLICKHOUSE_NATIVE_PORT}:9000"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8123/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  clickhouse-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sentinelflow/app:local
+    profiles: [core]
+    command: ["sentinelflow-enrich", "bootstrap"]
+    environment:
+      <<: *app-env
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      redpanda-topics:
+        condition: service_completed_successfully
+    restart: "no"
+
+  minio:
+    image: ${MINIO_IMAGE}
+    profiles: [core]
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "${MINIO_API_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    image: ${MINIO_MC_IMAGE}
+    profiles: [core]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        mc alias set lake http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"
+        for bucket in bronze silver gold checkpoints; do
+          mc mb --ignore-existing "lake/$$bucket"
+        done
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: "no"
+
+  simulator:
+    image: sentinelflow/app:local
+    profiles: [tools]
+    entrypoint: ["sentinelflow-sim"]
+    command: ["run", "--mode", "realtime", "--duration", "1h", "--attack", "all"]
+    environment:
+      <<: *app-env
+    volumes:
+      - ./data:/opt/sentinelflow/data
+
+  spark-master:
+    build:
+      context: .
+      dockerfile: streaming/Dockerfile
+    image: sentinelflow/spark:local
+    profiles: [streaming]
+    command: ["spark-class", "org.apache.spark.deploy.master.Master", "--host", "spark-master", "--port", "7077", "--webui-port", "8080"]
+    environment:
+      <<: *spark-env
+      SPARK_MASTER_OPTS: -Dspark.deploy.recoveryMode=FILESYSTEM -Dspark.deploy.recoveryDirectory=/var/lib/spark-recovery
+    volumes:
+      - spark-recovery:/var/lib/spark-recovery
+    ports:
+      - "${SPARK_MASTER_UI_PORT}:8080"
+      - "${SPARK_MASTER_PORT}:7077"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  spark-worker:
+    image: sentinelflow/spark:local
+    profiles: [streaming]
+    command: ["spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077", "--webui-port", "8081"]
+    environment:
+      <<: *spark-env
+      SPARK_WORKER_CORES: ${SPARK_WORKER_CORES}
+      SPARK_WORKER_MEMORY: ${SPARK_WORKER_MEMORY}
+    ports:
+      - "${SPARK_WORKER_UI_PORT}:8081"
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8081', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  spark-normalize:
+    <<: *spark-job
+    command:
+      - spark-submit
+      - --master=spark://spark-master:7077
+      - --conf=spark.cores.max=${SPARK_JOB_CORES}
+      - --conf=spark.executor.memory=${SPARK_EXECUTOR_MEMORY}
+      - --conf=spark.driver.memory=${SPARK_DRIVER_MEMORY}
+      - --conf=spark.driver.host=spark-normalize
+      - --conf=spark.driver.bindAddress=0.0.0.0
+      - /opt/sentinelflow/streaming/normalize_job.py
+    environment:
+      <<: *app-env
+      STREAMING_TRIGGER_INTERVAL: ${STREAMING_TRIGGER_INTERVAL}
+
+  spark-detect:
+    <<: *spark-job
+    command:
+      - spark-submit
+      - --master=spark://spark-master:7077
+      - --conf=spark.cores.max=${SPARK_JOB_CORES}
+      - --conf=spark.executor.memory=${SPARK_EXECUTOR_MEMORY}
+      - --conf=spark.driver.memory=${SPARK_DRIVER_MEMORY}
+      - --conf=spark.driver.host=spark-detect
+      - --conf=spark.driver.bindAddress=0.0.0.0
+      - /opt/sentinelflow/streaming/detect_job.py
+    environment:
+      <<: *app-env
+      STREAMING_TRIGGER_INTERVAL: ${STREAMING_TRIGGER_INTERVAL}
+      ALERT_SUPPRESSION: ${ALERT_SUPPRESSION}
+      DETECTION_WATERMARK: ${DETECTION_WATERMARK}
+      SENTINELFLOW_RULES_DIR: /opt/rules
+
+  dagster-postgres:
+    image: postgres:${POSTGRES_VERSION}
+    profiles: [batch]
+    environment:
+      POSTGRES_USER: ${DAGSTER_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DAGSTER_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DAGSTER_POSTGRES_DB}
+    volumes:
+      - dagster-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  dagster-webserver:
+    build:
+      context: .
+      dockerfile: orchestration/Dockerfile
+    image: sentinelflow/dagster:local
+    profiles: [batch]
+    command: ["dagster-webserver", "-h", "0.0.0.0", "-p", "3000", "-w", "/opt/dagster/workspace.yaml"]
+    environment:
+      <<: *dagster-env
+    ports:
+      - "${DAGSTER_PORT}:3000"
+    volumes:
+      - ./data/labels:/data/labels:ro
+      - ./data/geoip:/opt/sentinelflow/data/geoip
+    depends_on:
+      dagster-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/server_info', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  dagster-daemon:
+    image: sentinelflow/dagster:local
+    profiles: [batch]
+    command: ["dagster-daemon", "run", "-w", "/opt/dagster/workspace.yaml"]
+    environment:
+      <<: *dagster-env
+    volumes:
+      - ./data/labels:/data/labels:ro
+      - ./data/geoip:/opt/sentinelflow/data/geoip
+    depends_on:
+      dagster-postgres:
+        condition: service_healthy
+      dagster-webserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "dagster-daemon", "liveness-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION}
+    profiles: [observability]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_PLUGINS_PREINSTALL: grafana-clickhouse-datasource
+      GF_SERVER_ROOT_URL: ${GRAFANA_URL}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: mailpit:1025
+      GF_SMTP_FROM_ADDRESS: ${ALERT_FROM_ADDRESS}
+      GF_SMTP_SKIP_VERIFY: "true"
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./dashboards/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./dashboards/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  mailpit:
+    image: axllent/mailpit:${MAILPIT_VERSION}
+    profiles: [observability]
+    ports:
+      - "${MAILPIT_UI_PORT}:8025"
+      - "${MAILPIT_SMTP_PORT}:1025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  notifier:
+    image: sentinelflow/app:local
+    profiles: [observability]
+    command: ["sentinelflow-notify"]
+    restart: on-failure
+    environment:
+      <<: *app-env
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      ALERT_FROM_ADDRESS: ${ALERT_FROM_ADDRESS}
+      ALERT_RECIPIENTS: ${ALERT_RECIPIENTS}
+      NOTIFY_MIN_LEVEL: ${NOTIFY_MIN_LEVEL}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+      GRAFANA_URL: ${GRAFANA_URL}
+    depends_on:
+      mailpit:
+        condition: service_healthy
+      redpanda-topics:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import pathlib, time; assert time.time() - pathlib.Path('/tmp/notifier.alive').stat().st_mtime < 60"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  redpanda-data:
+  clickhouse-data:
+  minio-data:
+  dagster-postgres-data:
+  grafana-data:
+  vector-data:
+  spark-recovery:

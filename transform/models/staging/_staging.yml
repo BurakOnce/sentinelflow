@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: stg_events
+    description: Deduplicated normalized events with addresses rendered as text.
+    columns:
+      - name: event_id
+        tests: [not_null]
+      - name: event_time
+        tests: [not_null]
+      - name: event_category
+        tests:
+          - accepted_values:
+              arguments:
+                values: [authentication, network, web]
+      - name: event_outcome
+        tests:
+          - accepted_values:
+              arguments:
+                values: [success, failure]
+
+  - name: stg_alerts
+    description: Latest version of every alert.
+    columns:
+      - name: alert_id
+        tests: [not_null, unique]
+      - name: rule_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('rule_catalog')
+                field: rule_id
+      - name: level
+        tests:
+          - accepted_values:
+              arguments:
+                values: [informational, low, medium, high, critical]
+      - name: entity_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: [ip, user, host, global]
+      - name: risk_score
+        tests: [not_null]
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: [new, acknowledged, closed]
+
+  - name: stg_ground_truth
+    description: Attack labels, one row per labelled log line.
+    columns:
+      - name: attack_id
+        tests: [not_null]
+      - name: event_id
+        tests: [not_null]
+      - name: scenario
+        tests:
+          - relationships:
+              arguments:
+                to: ref('rule_scenario_map')
+                field: scenario

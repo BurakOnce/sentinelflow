@@ -1,0 +1,9 @@
+rule_id,rule_name,rule_title,rule_type,level,status,techniques,tactics,source_file
+76f7c930-fa5b-4ec5-9258-a2211c318f77,brute_force_success,SSH Brute Force Followed By Successful Login,correlation,critical,stable,T1110.001|T1078,credential-access|initial-access,brute_force_success.yml
+4e50c174-e031-414e-9d98-3c33f2105367,credential_stuffing,Credential Stuffing,correlation,high,experimental,T1110.004,credential-access,credential_stuffing.yml
+2fbe7728-1743-4438-90b2-6a5e1c87da09,impossible_travel,Impossible Travel,detector,high,experimental,T1078,initial-access|defense-evasion,impossible_travel.yml
+92ac5167-1e28-40bd-897e-6d079233274e,password_spraying,Password Spraying,correlation,high,stable,T1110.003,credential-access,password_spraying.yml
+4203919d-f40b-469a-a56b-6b5e8830e125,port_scan,Port Scan,correlation,medium,stable,T1046,discovery,port_scan.yml
+ea8124f3-38ec-4651-8ea2-53c1511dfa6c,scanner_user_agent,Known Scanner User Agent,single,medium,stable,T1595.002,reconnaissance,scanner_user_agent.yml
+95023802-9e6c-429a-84f8-4c1ee3e09ce4,ssh_bruteforce,SSH Brute Force,correlation,medium,stable,T1110.001,credential-access,ssh_bruteforce.yml
+d8b2489e-e8f1-4da4-b753-7f5b7c72d33e,web_attack_pattern,Web Attack Pattern In Request,single,high,stable,T1190,initial-access,web_attack.yml

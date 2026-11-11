@@ -1,0 +1,57 @@
+data_dir: /var/lib/vector
+
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
+sources:
+  raw_logs:
+    type: file
+    include:
+      - /data/logs/nginx/*.log
+      - /data/logs/ssh/*.log
+      - /data/logs/firewall/*.log
+      - /data/logs/app/*.log
+    read_from: beginning
+    glob_minimum_cooldown_ms: 1000
+
+  ground_truth:
+    type: file
+    include:
+      - /data/labels/*.jsonl
+    read_from: beginning
+
+transforms:
+  tag_log_type:
+    type: remap
+    inputs: [raw_logs]
+    drop_on_abort: true
+    source: |
+      parsed, err = parse_regex(.file, r'^/data/logs/(?P<log_type>nginx|ssh|firewall|app)/')
+      if err != null {
+        abort
+      }
+      .log_type = parsed.log_type
+
+sinks:
+  redpanda_raw:
+    type: kafka
+    inputs: [tag_log_type]
+    bootstrap_servers: redpanda:9092
+    topic: "raw.{{ log_type }}"
+    compression: lz4
+    acknowledgements:
+      enabled: true
+    encoding:
+      codec: text
+
+  redpanda_labels:
+    type: kafka
+    inputs: [ground_truth]
+    bootstrap_servers: redpanda:9092
+    topic: labels.ground_truth
+    compression: lz4
+    acknowledgements:
+      enabled: true
+    encoding:
+      codec: text

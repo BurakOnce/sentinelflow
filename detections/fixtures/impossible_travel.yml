@@ -1,0 +1,35 @@
+rule: impossible_travel
+cases:
+  - name: istanbul and new york within thirty minutes
+    expect: alert
+    count: 1
+    lines:
+      - source: app
+        raw: '{{"timestamp":"{ts}","level":"info","service":"portal-auth","event":"login","request_id":"a1","user":"ayse.yilmaz","ip":"78.160.10.10","result":"success","reason":null,"mfa":"push","user_agent":"Mozilla/5.0"}}'
+      - source: app
+        raw: '{{"timestamp":"{ts}","level":"info","service":"portal-auth","event":"login","request_id":"a2","user":"ayse.yilmaz","ip":"73.0.10.10","result":"success","reason":null,"mfa":"push","user_agent":"Mozilla/5.0"}}'
+        at: 1800
+  - name: istanbul and ankara within ten minutes
+    expect: no_alert
+    lines:
+      - source: app
+        raw: '{{"timestamp":"{ts}","level":"info","service":"portal-auth","event":"login","request_id":"b1","user":"ayse.yilmaz","ip":"78.160.10.10","result":"success","reason":null,"mfa":"push","user_agent":"Mozilla/5.0"}}'
+      - source: app
+        raw: '{{"timestamp":"{ts}","level":"info","service":"portal-auth","event":"login","request_id":"b2","user":"ayse.yilmaz","ip":"78.164.10.10","result":"success","reason":null,"mfa":"push","user_agent":"Mozilla/5.0"}}'
+        at: 600
+  - name: munich home line and berlin mobile line of the same user
+    expect: no_alert
+    lines:
+      - source: app
+        raw: '{{"timestamp":"{ts}","level":"info","service":"portal-auth","event":"login","request_id":"c1","user":"lena.maier","ip":"79.200.0.10","result":"success","reason":null,"mfa":"push","user_agent":"Mozilla/5.0"}}'
+      - source: app
+        raw: '{{"timestamp":"{ts}","level":"info","service":"portal-auth","event":"login","request_id":"c2","user":"lena.maier","ip":"79.192.0.10","result":"success","reason":null,"mfa":"push","user_agent":"Mozilla/5.0 Mobile"}}'
+        at: 1200
+  - name: new york and san francisco on the same carrier
+    expect: no_alert
+    lines:
+      - source: app
+        raw: '{{"timestamp":"{ts}","level":"info","service":"portal-auth","event":"login","request_id":"d1","user":"eric.smith","ip":"73.0.10.10","result":"success","reason":null,"mfa":"push","user_agent":"Mozilla/5.0"}}'
+      - source: app
+        raw: '{{"timestamp":"{ts}","level":"info","service":"portal-auth","event":"login","request_id":"d2","user":"eric.smith","ip":"73.32.10.10","result":"success","reason":null,"mfa":"push","user_agent":"Mozilla/5.0 Mobile"}}'
+        at: 600

@@ -1,0 +1,54 @@
+title: Inbound Firewall Connection Attempt
+id: 3b232f38-37d2-4259-a9e6-7d7f070d23df
+name: inbound_connection_attempt
+status: stable
+description: A packet from outside reached the edge firewall and was logged.
+references:
+  - https://attack.mitre.org/techniques/T1046/
+author: SentinelFlow
+date: 2026-09-30
+tags:
+  - attack.discovery
+logsource:
+  product: sentinelflow
+  category: network
+  service: firewall
+detection:
+  selection:
+    event_action:
+      - firewall_accept
+      - firewall_drop
+      - firewall_reject
+  filter_internal:
+    source_ip|cidr:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+  condition: selection and not filter_internal
+level: informational
+---
+title: Port Scan
+id: 4203919d-f40b-469a-a56b-6b5e8830e125
+name: port_scan
+status: stable
+description: One source address touched twenty or more distinct destination ports within one minute.
+references:
+  - https://attack.mitre.org/techniques/T1046/
+author: SentinelFlow
+date: 2026-09-30
+tags:
+  - attack.discovery
+  - attack.t1046
+correlation:
+  type: value_count
+  rules:
+    - inbound_connection_attempt
+  group-by:
+    - source_ip
+  timespan: 1m
+  condition:
+    field: destination_port
+    gte: 20
+falsepositives:
+  - Authorized vulnerability scanners
+level: medium

@@ -1,0 +1,56 @@
+title: Web Attack Pattern In Request
+id: d8b2489e-e8f1-4da4-b753-7f5b7c72d33e
+name: web_attack_pattern
+status: stable
+description: >-
+  The request target contains SQL injection, path traversal or cross site scripting patterns,
+  in plain or URL encoded form.
+references:
+  - https://attack.mitre.org/techniques/T1190/
+  - https://owasp.org/www-project-top-ten/
+author: SentinelFlow
+date: 2026-09-30
+tags:
+  - attack.initial-access
+  - attack.t1190
+logsource:
+  product: sentinelflow
+  category: web
+  service: nginx
+detection:
+  selection_sqli:
+    url_path|contains:
+      - "' or '"
+      - "%27%20or%20"
+      - "%27%20and%20"
+      - "' and "
+      - union select
+      - union%20select
+      - union%20all%20select
+      - sleep(
+      - sleep%28
+      - drop%20table
+      - drop table
+  selection_traversal:
+    url_path|contains:
+      - ../
+      - ..%2f
+      - "%2e%2e/"
+      - "%2e%2e%2f"
+      - etc/passwd
+      - etc%2fpasswd
+      - win.ini
+  selection_xss:
+    url_path|contains:
+      - <script
+      - "%3cscript"
+      - onerror=
+      - onerror%3d
+      - onload=
+      - onload%3d
+      - "javascript:"
+      - "javascript%3a"
+  condition: 1 of selection_*
+falsepositives:
+  - Search queries that legitimately contain SQL keywords
+level: high

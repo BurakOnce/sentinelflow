@@ -1,0 +1,74 @@
+title: Successful SSH Password Login
+id: 3b5a257c-c331-4849-83d6-1192b00479bb
+name: ssh_password_success
+status: stable
+description: A password login to sshd succeeded.
+references:
+  - https://attack.mitre.org/techniques/T1078/
+author: SentinelFlow
+date: 2026-09-30
+tags:
+  - attack.initial-access
+logsource:
+  product: sentinelflow
+  category: authentication
+  service: ssh
+detection:
+  selection:
+    event_action: ssh_login
+    event_outcome: success
+  condition: selection
+falsepositives:
+  - Normal administrator logins
+level: informational
+---
+title: Repeated SSH Failures Before Success Window
+id: 39e5f1b5-ec40-4e5b-9e59-c4cf8aab6d43
+name: ssh_failures_before_success
+status: stable
+description: Ten or more failed SSH password logins from one source address within ten minutes.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+author: SentinelFlow
+date: 2026-09-30
+tags:
+  - attack.credential-access
+correlation:
+  type: event_count
+  rules:
+    - ssh_failed_login
+  group-by:
+    - source_ip
+  timespan: 10m
+  condition:
+    gte: 10
+level: low
+---
+title: SSH Brute Force Followed By Successful Login
+id: 76f7c930-fa5b-4ec5-9258-a2211c318f77
+name: brute_force_success
+status: stable
+description: >-
+  A source address that failed at least ten SSH password logins then logged in successfully
+  within ten minutes, which suggests a guessed password.
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+  - https://attack.mitre.org/techniques/T1078/
+author: SentinelFlow
+date: 2026-09-30
+tags:
+  - attack.credential-access
+  - attack.initial-access
+  - attack.t1110.001
+  - attack.t1078
+correlation:
+  type: temporal_ordered
+  rules:
+    - ssh_failures_before_success
+    - ssh_password_success
+  group-by:
+    - source_ip
+  timespan: 10m
+falsepositives:
+  - A user who forgot a recently rotated password and eventually remembers it
+level: critical

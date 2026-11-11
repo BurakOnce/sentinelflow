@@ -1,0 +1,15 @@
+weights:
+  level: 40
+  threat_intel: 20
+  foreign_country: 15
+  successful_login: 15
+  recurrence: 10
+
+level_factors:
+  informational: 0.0
+  low: 0.25
+  medium: 0.5
+  high: 0.75
+  critical: 1.0
+
+recurrence_saturation: 5

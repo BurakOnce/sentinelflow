@@ -1,0 +1,33 @@
+rule: brute_force_success
+cases:
+  - name: twelve failures and then a successful password login
+    expect: alert
+    count: 1
+    lines:
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[2{n:04d}]: Failed password for deploy from 14.181.6.10 port 4{n:04d} ssh2'
+        repeat: 12
+        every: 5
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[29999]: Accepted password for deploy from 14.181.6.10 port 49999 ssh2'
+        at: 70
+  - name: two typos and then a successful login
+    expect: no_alert
+    lines:
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[2{n:04d}]: Failed password for ayse.yilmaz from 78.160.10.10 port 4{n:04d} ssh2'
+        repeat: 2
+        every: 5
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[29999]: Accepted password for ayse.yilmaz from 78.160.10.10 port 49999 ssh2'
+        at: 20
+  - name: successful login before the failures
+    expect: no_alert
+    lines:
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[29999]: Accepted password for deploy from 14.181.6.10 port 49999 ssh2'
+      - source: ssh
+        raw: '{ts} bastion-01 sshd[2{n:04d}]: Failed password for deploy from 14.181.6.10 port 4{n:04d} ssh2'
+        repeat: 12
+        every: 5
+        at: 10

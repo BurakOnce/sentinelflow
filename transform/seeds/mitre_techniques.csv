@@ -1,0 +1,15 @@
+technique_id,technique_name,tactic
+T1110,Brute Force,credential-access
+T1110.001,Password Guessing,credential-access
+T1110.002,Password Cracking,credential-access
+T1110.003,Password Spraying,credential-access
+T1110.004,Credential Stuffing,credential-access
+T1078,Valid Accounts,initial-access
+T1133,External Remote Services,initial-access
+T1190,Exploit Public-Facing Application,initial-access
+T1046,Network Service Discovery,discovery
+T1595.001,Scanning IP Blocks,reconnaissance
+T1595.002,Vulnerability Scanning,reconnaissance
+T1021.004,Remote Services: SSH,lateral-movement
+T1071.001,Application Layer Protocol: Web Protocols,command-and-control
+T1498,Network Denial of Service,impact

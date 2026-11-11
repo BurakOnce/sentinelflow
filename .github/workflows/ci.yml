@@ -1,0 +1,104 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_FROZEN: "1"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - run: uv sync --all-extras
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - run: uv sync --all-extras
+      - run: uv run pytest -m "not integration" -v
+
+  rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - run: uv sync
+      - run: uv run sentinelflow-rules validate
+      - run: uv run sentinelflow-rules export --check
+
+  dbt:
+    runs-on: ubuntu-latest
+    services:
+      clickhouse:
+        image: clickhouse/clickhouse-server:26.3
+        env:
+          CLICKHOUSE_USER: sentinel
+          CLICKHOUSE_PASSWORD: ci-password
+          CLICKHOUSE_DB: sentinelflow
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+        ports:
+          - 8123:8123
+        options: >-
+          --health-cmd "wget -q -O /dev/null http://localhost:8123/ping"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      CLICKHOUSE_HOST: localhost
+      CLICKHOUSE_PORT: "8123"
+      CLICKHOUSE_USER: sentinel
+      CLICKHOUSE_PASSWORD: ci-password
+      CLICKHOUSE_DB: sentinelflow
+      CLICKHOUSE_KAFKA_BROKERS: localhost:9092
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - run: uv sync --extra orchestration
+      - name: Apply migrations and load fixtures
+        run: uv run sentinelflow-enrich bootstrap
+      - name: dbt parse
+        working-directory: transform
+        run: uv run dbt parse --profiles-dir .
+      - name: dbt build
+        working-directory: transform
+        run: uv run dbt build --profiles-dir .
+      - name: dbt docs
+        working-directory: transform
+        run: uv run dbt docs generate --profiles-dir .
+
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - run: cp .env.example .env
+      - run: docker compose --profile core --profile streaming --profile batch --profile observability build

@@ -1,0 +1,38 @@
+title: Impossible Travel
+id: 2fbe7728-1743-4438-90b2-6a5e1c87da09
+name: impossible_travel
+status: experimental
+description: >-
+  Two successful logins for the same account came from locations whose distance could not be
+  covered in the time between them.
+references:
+  - https://attack.mitre.org/techniques/T1078/
+author: SentinelFlow
+date: 2026-09-30
+tags:
+  - attack.initial-access
+  - attack.defense-evasion
+  - attack.t1078
+logsource:
+  product: sentinelflow
+  category: authentication
+detection:
+  selection:
+    event_action:
+      - app_login
+      - ssh_login
+    event_outcome: success
+  condition: selection
+falsepositives:
+  - VPN or proxy egress in another country
+  - Mobile carriers whose addresses geolocate far from the subscriber
+  - Attackers on the same carrier as the victim are not reported by design
+level: high
+sentinelflow:
+  detector: impossible_travel
+  entity: user_name
+  parameters:
+    max_speed_kmh: 900
+    min_distance_km: 500
+    min_domestic_distance_km: 1500
+    ignore_same_asn: true
